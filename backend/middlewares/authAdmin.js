@@ -1,27 +1,38 @@
-import jwt from 'jsonwebtoken'
+import jwt from 'jsonwebtoken';
 
-// admin authentication middleware 
+// Admin authentication middleware
 const authAdmin = async (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
+    const token = authHeader?.startsWith('Bearer ')
+      ? authHeader.slice(7)
+      : req.headers.token;
 
-    try {
-
-        const { atoken } = req.headers
-        if (!atoken) {
-            return res.json({ success: false, message: 'Not Authorized Login Again' })
-        }
-        const token_decode = jwt.verify(atoken, process.env.JWT_SECRET)
-
-        if (token_decode !== process.env.ADMIN_EMAIL + process.env.ADMIN_password) {
-            return res.json({ success: false, message: 'Not Authorized Login Again' })
-        }
-
-        next()
-
-    } catch (error) {
-        console.log(error)
-        return res.json({ success: false, message: error.message })
-
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: 'Not Authorized. Login Again'
+      });
     }
-}
 
-export default authAdmin
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    if (decoded !== process.env.ADMIN_EMAIL + process.env.ADMIN_PASSWORD) {
+      return res.status(401).json({
+        success: false,
+        message: 'Not Authorized. Login Again'
+      });
+    }
+
+    next();
+  } catch (error) {
+    console.error('Admin authentication error:', error.message);
+
+    return res.status(401).json({
+      success: false,
+      message: 'Invalid or expired admin token. Please log in again.'
+    });
+  }
+};
+
+export default authAdmin;
