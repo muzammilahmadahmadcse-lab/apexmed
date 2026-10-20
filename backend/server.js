@@ -16,22 +16,17 @@ connectCloudinary()
 
 //  middlewares
 app.use(express.json())
-
-// FIX: Enable full CORS configuration for separate frontend/admin deployments
-app.use(cors({
-    origin: '*', // Allows requests from your deployed Vercel frontends/admin panels
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'atoken', 'aToken', 'Authorization'],
-    credentials: true
-}))
+app.use(cors())
 
 // api endpoint
 app.use('/api/admin',adminRouter)
 app.use('/api/doctor',doctorRouter)
 app.use('/api/user',userRouter)
-
+// localhost:4000/api/admin/add-doctor
 app.get('/',(req,res)=>{
-    res.send('API WORKING')
-})
 
+    res.send('API WORKING')
+
+
+})
 app.listen(port, ()=> console.log("Server Started",port))
