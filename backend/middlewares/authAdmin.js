@@ -1,36 +1,30 @@
 import jwt from 'jsonwebtoken';
 
-// Admin authentication middleware
-const authAdmin = async (req, res, next) => {
+const authAdmin = (req, res, next) => {
   try {
-    const authHeader = req.headers.authorization;
-    const token = authHeader?.startsWith('Bearer ')
-      ? authHeader.slice(7)
-      : req.headers.token;
+    const { atoken } = req.headers;
 
-    if (!token) {
+    if (!atoken) {
       return res.status(401).json({
         success: false,
-        message: 'Not Authorized. Login Again'
+        message: 'Admin token missing. Please log in again.'
       });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(atoken, process.env.JWT_SECRET);
 
-    if (decoded !== process.env.ADMIN_EMAIL + process.env.ADMIN_PASSWORD) {
+    if (decoded !== process.env.ADMIN_EMAIL) {
       return res.status(401).json({
         success: false,
-        message: 'Not Authorized. Login Again'
+        message: 'Invalid admin token.'
       });
     }
 
     next();
   } catch (error) {
-    console.error('Admin authentication error:', error.message);
-
     return res.status(401).json({
       success: false,
-      message: 'Invalid or expired admin token. Please log in again.'
+      message: 'Admin session expired or invalid. Please log in again.'
     });
   }
 };
